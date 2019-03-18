@@ -3,7 +3,7 @@ import pytest
 
 def test_add_one_item(browser):
     browser.goto('www.saucedemo.com/inventory.html')
-    browser.button(class_name='add-to-cart-button').click()
+    browser.button(class_name='btn_primary').click()
 
     assert browser.span(class_name='shopping_cart_badge').text == '1'
     
@@ -12,8 +12,8 @@ def test_add_one_item(browser):
 
 def test_add_two_items(browser):
     browser.goto('www.saucedemo.com/inventory.html')
-    browser.button(class_name='add-to-cart-button').click()
-    browser.button(class_name='add-to-cart-button').click()
+    browser.button(class_name='btn_primary').click()
+    browser.button(class_name='btn_primary').click()
 
     assert browser.span(class_name='shopping_cart_badge').text == '2'
     
