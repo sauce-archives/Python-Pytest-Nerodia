@@ -24,9 +24,9 @@ This code is provided on an "AS-IS” basis without warranty of any kind, either
     ```
 3. Project
 	* The recommended way to run your tests would be in [virtualenv](https://virtualenv.readthedocs.org/en/latest/). It will isolate the build from other setups you may have running and ensure that the tests run with the specified versions of the modules specified in the requirements.txt file.
-	```$ pip install virtualenv```
+
 	* Create a virtual environment in your project folder the environment name is arbitrary.
-	```$ virtualenv venv```
+	```$ python3 -m venv ./venv```
 	* Activate the environment:
 	```$ source venv/bin/activate```
 	* Install the required packages:
@@ -50,7 +50,7 @@ There may be additional latency when using a remote webdriver to run tests on Sa
 
 ##### [Selenium Documentation](http://www.seleniumhq.org/docs/)
 
-##### [Python Documentation](https://docs.python.org/2.7/)
+##### [Python Documentation](https://docs.python.org/3.6/)
 
 ##### [Pytest Documentation](http://pytest.org/latest/contents.html)
 
