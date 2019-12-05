@@ -1,86 +1,32 @@
 import pytest
-from _pytest.runner import runtestprotocol
+
+from simplesauce.options import SauceOptions
+from simplesauce.session import SauceSession
 from nerodia.browser import Browser
-from selenium import webdriver
-from selenium.webdriver.remote.remote_connection import RemoteConnection
-from os import environ
-
-
-single_browser = [{
-    "seleniumVersion": '3.4.0',
-    "platform": "Windows 10",
-    "browserName": "firefox",
-    "version": "latest"
-}]
 
 browsers = [
-    {
-        "seleniumVersion": '3.4.0',
-        "platform": "Windows 10",
-        "browserName": "MicrosoftEdge",
-        "version": "latest"
-    }, {
-        "seleniumVersion": '3.4.0',
-        "platform": "Windows 10",
-        "browserName": "firefox",
-        "version": "latest"
-    }, {
-        "seleniumVersion": '3.4.0',
-        "platform": "Windows 7",
-        "browserName": "internet explorer",
-        "version": "latest"
-    }, {
-        "seleniumVersion": '3.4.0',
-        "platform": "OS X 10.13",
-        "browserName": "safari",
-        "version": "latest-1"
-    }, {
-        "seleniumVersion": '3.4.0',
-        "platform": "OS X 10.11",
-        "browserName": "chrome",
-        "version": "latest",
-        "extendedDebugging": True
-    }]
+    'internet explorer',
+    'safari',
+    'edge',
+    'chrome',
+    'firefox'
+]
 
-def pytest_generate_tests(metafunc):
-    if 'browser' in metafunc.fixturenames:
-        metafunc.parametrize('browser_config',
-                             browsers,
-                             ids=_generate_param_ids('broswerConfig', browsers),
-                             scope='function')
 
-def _generate_param_ids(name, values):
-    return [("<%s:%s>" % (name, value)).replace('.', '_') for value in values]
-
-@pytest.fixture
-def browser(request, browser_config):
-    caps = {}
-    caps.update(browser_config)
-
-    build_tag = "nerodia-build"
-    username = environ.get('SAUCE_USERNAME', None)
-    access_key = environ.get('SAUCE_ACCESS_KEY', None)
-
-    selenium_endpoint = "http://ondemand.saucelabs.com/wd/hub"
+@pytest.fixture(params=browsers)
+def browser(request):
+    opts = SauceOptions(request.param)
+    opts.name = request.node.name
+    session = SauceSession(options=opts)
     
-    caps['username'] = username
-    caps['accesskey'] = access_key
-    caps['name'] = request.node.name
-    caps['build'] = build_tag
-
-    executor = RemoteConnection(selenium_endpoint, resolve_ip=False)
-    remote = webdriver.Remote(
-        command_executor=executor,
-        desired_capabilities=caps
-    )
-
-    browser = Browser(browser=remote, desired_capabilities=caps)
+    browser = Browser(browser=session.start())
     yield browser
-    
-    sauce_result = "failed" if request.node.rep_call.failed else "passed"
-    browser.execute_script("sauce:job-result={}".format(sauce_result))
-    browser.quit()
 
+    result = 'failed' if request.node.rep_call.failed else 'passed'
+    session.update_test_result(result)
+    browser.quit()
+    
+    
 @pytest.hookimpl(hookwrapper=True, tryfirst=True)
 def pytest_runtest_makereport(item, call):
     """Needed pytest hook for accessing pass/fail results
